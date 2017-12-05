@@ -1,0 +1,8 @@
+
+Now let's improve our code by taking the workers' behavior out into a separate module. Create a module called role.harvester with the help of the Modules section on the left of the script editor and define a run function inside the module.exports object, containing the creep behavior.
+
+Now you can rewrite the main module code, leaving only the loop and a call to your new module by the method require('role.harvester').
+
+Maintaining extensions requires you to teach your harvesters to carry energy not just to a spawn but also to extensions. To do this, you can either use the Game.structures object or search within the room with the help of Room.find(FIND_STRUCTURES). In both cases, you will need to filter the list of items on the condition structure.structureType == STRUCTURE_EXTENSION (or, alternatively, structure instanceof StructureExtension) and also check them for energy load, as before.
+
+
