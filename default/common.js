@@ -158,12 +158,11 @@ module.exports.spawnCreeps = function ()
 
 }
 
+/** @description Find all sources in room with 'Spawn1' and make array of them, sorted by the distance from spawn
+*/
 module.exports.initRoom = function ()
 {
-    /*
-    Function of room initialization:
-        Find all sources and make array of them, sorted by the distance from spawn
-    */
+    // Probably should add 'roomName' parameter to the function to go out from 'Spawn1', but then we additionally have to find spawn in this room
 
     // Listing all sources in the room with Spawn1 in memory sorting them by distance
     var sources = Game.spawns['Spawn1'].room.find(FIND_SOURCES);
@@ -195,9 +194,12 @@ module.exports.initRoom = function ()
         if (!containerFound) {
             // Here we add code fo building a container on a free space, for example Game.spawns['Spawn1'].room.memory.sourcesSorted[source].freeSpaces[0]
             // better is to count free spaces and get a middle from it, so a container will appear in the central free cell near source to provide access for more creeps
+            // Ideally is to find for container a freecell near source, that is surrounded by maximum number of freecells, so the container is accessible for max creeps
             // if any containerharvesters exist, we should put free=false on the cell with container, so other creeps will not occupy it. But we have to check if container building is finished.
+            var containerX = Game.spawns['Spawn1'].room.memory.sourcesSorted[source].freeSpaces[0].x;
+            var containerY = Game.spawns['Spawn1'].room.memory.sourcesSorted[source].freeSpaces[0].y;
+            Game.spawns['Spawn1'].room.createConstructionSite(containerX, containerY, STRUCTURE_CONTAINER);
         }
-
     }
 
         //var containerFound = false;
@@ -223,7 +225,35 @@ module.exports.initRoom = function ()
         //    // Here add code for building a container near source
         //    // We have to check for free spaces near a source and build container there
         //}
-       
-    }
+}
 
+/** @description Check, if number of spawn extensions is compared to controller level and building new extensions if needed
+* Possibly we have to add a 'roomName' param to deal with different rooms, now we work only with room with 'Spawn1'
+*/
+module.exports.checkExtensions = function ()
+{
+    // Possibly we have to add a flag in the memory, that for example for controller level 2 is everything done (while loop finished OK)
+    // Then just check in the very beginning, if controller level still the same and everything was done, then just leave function to save CPU
+    const capacities = [300, 550, 800, 1300, 1800, 2300, 2800, 3300];
+    if (Game.spawns['Spawn1'].room.energyCapacityAvailable >= capacities[Game.spawns['Spawn1'].room.controller.level - 1])
+        return; // Already built all extensions for this controller level
+
+    extensionsToBuild = (capacities[Game.spawns['Spawn1'].room.controller.level - 1] - Game.spawns['Spawn1'].room.energyCapacityAvailable) / 50;
+
+    var coordOffset = 1; // at first starting building 1 cell away from spawn, then we will go by spiral adding to coordOffset
+    while (extensionsToBuild > 0)
+    {
+         for (var x = Game.spawns['Spawn1'].pos.x - coordOffset; Game.spawns['Spawn1'].pos.x + coordOffset; x++)
+            for (var y = Game.spawns['Spawn1'].pos.y - coordOffset; Game.spawns['Spawn1'].pos.y + coordOffset; y++)
+            {
+                // This loops can be not effective, because increasing coordoffset we still checking everything inside the area, what was done in the previous loop
+                var tryResult = Game.spawns['Spawn1'].room.createConstructionSite(x, y, STRUCTURE_EXTENSION);
+                if (tryResults == OK) {  // Construction site created OK
+                    extensionsToBuild--;
+                    continue;
+                } else if (tryResults == ERR_FULL || tryResults == ERR_RCL_NOT_ENOUGH)
+                    return; // If errors "too many construction sites" or "insufficient controller level", then leave the function
+            }
+         coordOffset++; // Increasing coordOffset - going further away from spawn by spirale
+    }
 }

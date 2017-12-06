@@ -27,7 +27,8 @@ var common = require('common');
 
 module.exports.loop = function () {
 
-    common.initRoom();
+    //common.initRoom();
+    //common.checkExtensions();
 
     // Draw visuals (amount of energy in spawn out of total and so on)
     visuals.drawVisuals();

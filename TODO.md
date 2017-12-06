@@ -5,11 +5,13 @@
 	* Mark and put in memory all clear spaces around sources (terrain <> wall)
 		done, needs checking
 	* Check if there is container exist next to source, if not - build it
-		* checking for container is implemented, need to add code for building a container if it's not exist
+		* done, needs checking
 	* Make a flag, that room has already been initialized (sources, free spaces, containers), not to check it in future to save CPU
 	* After all containers are completely built, build roads from sources to spawn and controller, then put a flag, that roads built
 	* Remove flag abour room initialization (and possibly roads) after enemy invasion, to check if something was destroyed
 	* Automate build of spawn extensions depending on room controller level (get square 4-5 cells away from spawn and try to fill it with extensions)
+		* done, needs checking. We go not on square, but by spiral away from spawn.
+	* Change the function to pass roomName to it instead of working only with Spawn1.
 
  * Change gatherEnergy
 	* If going to gather from source, then look for free spaces (from memory) around source, and if found, occupy them. 
