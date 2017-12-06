@@ -1,5 +1,5 @@
 // Game.spawns['Spawn1'].spawnCreep( [WORK, CARRY, MOVE], 'Harvester1',     { memory: { role: 'harvester' } } );
-//  Game.spawns['Spawn1'].spawnCreep( [WORK, CARRY, MOVE], 'Builder1',     { memory: { role: 'builder' } } );
+// Game.spawns['Spawn1'].spawnCreep( [WORK, CARRY, MOVE], 'Builder1',     { memory: { role: 'builder' } } );
 // Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, WORK, WORK, MOVE], 'HarvesterContainer1', { memory: { role: 'harvesterContainer' } });
 // Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], 'Upgrader3', { memory: { role: 'upgrader' } } );
 
@@ -12,7 +12,7 @@ if (!Memory.vars) {
     Memory.vars.minBuilders = 0;
 }
 
-// Overriding memory vars:
+//Overriding memory vars:
 //Memory.vars.minHarvesters = 1;
 //Memory.vars.minContainerHarvesters = 1;
 //Memory.vars.minUpgraders = 2;
