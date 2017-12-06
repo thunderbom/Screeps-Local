@@ -56,7 +56,10 @@ function spawnCreep(creepMods, creepRole)   // creepMods - array of creep builds
     }
 }
 
-// Returns price of creep in energy
+/** @description Returns energy price of creep depending on it modification
+* @param {array} creepMods array with creep parts, for example: [WORK, CARRY, MOVE]
+* @return {int} Creep price.
+*/
 function creepPrice(creepParts)
 {
     var price = 0;
@@ -167,33 +170,60 @@ module.exports.initRoom = function ()
     var sourcesSorted = _.sortBy(sources, s => Game.spawns['Spawn1'].pos.getRangeTo(s));
     Game.spawns['Spawn1'].room.memory.sources = sourcesSorted;
 
-    // console.log(sourcesSorted[0].pos.x-1);
-
     for (source in sourcesSorted) {
+        var surroundings = Game.spawns['Spawn1'].room.lookAtArea(sourcesSorted[source].pos.y - 1, sourcesSorted[source].pos.x - 1, sourcesSorted[source].pos.y + 1, sourcesSorted[source].pos.x + 1, true); // true for getting results as plain array
         var containerFound = false;
-        var structures = Game.spawns['Spawn1'].room.lookForAtArea(LOOK_STRUCTURES, sourcesSorted[source].pos.y - 1, sourcesSorted[source].pos.x - 1, sourcesSorted[source].pos.y + 1, sourcesSorted[source].pos.x + 1);
-        Game.spawns['Spawn1'].room.memory.structures = structures;
-        // delete Game.spawns['Spawn1'].room.memory.structures;
-        var containers = [];        // new Array()
-        for (y in structures) 
-            for (x in structures[y])
-                if (structures[y][x].length > 0)
-                    for (structure in structures[y][x])
-                        if (structures[y][x][structure].structureType == 'container')
-                        {
-                            containerFound = true;
-                            containers.push(structures[y][x][structure]);       // Adding container to array
-                        }
-        // console.log(containers);
-        if (containerFound) {
-            Game.spawns['Spawn1'].room.memory.sources[source].containers = containers;
+        for (var cell in surroundings) {
+            if (surroundings[cell].type == "creep" || surroundings[cell].type == "source" || surroundings[cell].terrain == "wall")
+                continue;   // if we are looking or source, wall or just entry with creep, then ignore it and go to next for iteration
+
+            if (surroundings[cell].type == "source" && surroundings[cell].structure.structureType == "container") {
+                // If we found a container, set a found flag, so later we know that there are no need to build another container
+                // Add info for this container in memory looking like: Memory.rooms[roomname].spawns[spawnname].<source>.containers
+                // Possibly has to change it, not just looking for 1 container, but counting containers around source and putting this info in memory
+                containerFound = true;
+                Game.spawns['Spawn1'].room.memory.sourcesSorted[source].container = surroundings[cell].structure;
+            }
+
+            if (surroundings[cell].type == "terrain") {
+                // Adding to memory info about free terrain spots (plains and swamp) around source
+                // free attribute is for creeps to look for free cell and occupy it (free: false), if no free cells, then go to next source
+                Game.spawns['Spawn1'].room.memory.sourcesSorted[source].freeSpaces.push({ "x": surroundings[cell].x, "y": surroundings[cell].y, "free": true });
+            }
         }
-        else
-        {
-            // Here add code for building a container near source
-            // We have to check for free spaces near a source and build container there
+
+        if (!containerFound) {
+            // Here we add code fo building a container on a free space, for example Game.spawns['Spawn1'].room.memory.sourcesSorted[source].freeSpaces[0]
+            // better is to count free spaces and get a middle from it, so a container will appear in the central free cell near source to provide access for more creeps
+            // if any containerharvesters exist, we should put free=false on the cell with container, so other creeps will not occupy it. But we have to check if container building is finished.
         }
+
+    }
+
+        //var containerFound = false;
+        //var structures = Game.spawns['Spawn1'].room.lookForAtArea(LOOK_STRUCTURES, sourcesSorted[source].pos.y - 1, sourcesSorted[source].pos.x - 1, sourcesSorted[source].pos.y + 1, sourcesSorted[source].pos.x + 1);
+        //Game.spawns['Spawn1'].room.memory.structures = structures;
+        //// delete Game.spawns['Spawn1'].room.memory.structures;
+        //var containers = [];        // new Array()
+        //for (y in structures) 
+        //    for (x in structures[y])
+        //        if (structures[y][x].length > 0)
+        //            for (structure in structures[y][x])
+        //                if (structures[y][x][structure].structureType == 'container')
+        //                {
+        //                    containerFound = true;
+        //                    containers.push(structures[y][x][structure]);       // Adding container to array
+        //                }
+        //// console.log(containers);
+        //if (containerFound) {
+        //    Game.spawns['Spawn1'].room.memory.sources[source].containers = containers;
+        //}
+        //else
+        //{
+        //    // Here add code for building a container near source
+        //    // We have to check for free spaces near a source and build container there
+        //}
        
-    }  
+    }
 
 }
